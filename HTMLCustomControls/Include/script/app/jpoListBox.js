@@ -22,6 +22,7 @@
             this.allowMultiple = true,
             this.customAdd = false,
             this.small = false,
+            this.showSelected = false,
             this.init = function (c, options) {
                 this.container = $(c);
                 var me = this;
@@ -48,6 +49,9 @@
                 if (!!options.customAdd) {
                     this.customAdd = options.customAdd;
                 }
+                if (!!options.showSelected) {
+                    this.showSelected = options.showSelected;
+                }
                 if (!options.small) {
                     options.small = false;
                 }
@@ -58,12 +62,6 @@
                 jpIndexListBox.cnter += 1;
                 this.name = '#_jpil_' + jpIndexListBox.cnter;
                 this.buildFrame(options);
-                this.headerBox = this.container.find('._jpil_header');
-                this.selList = this.container.find('._jpil_selList');
-                this.selectedBox = this.container.find('._jpil_selectedList');
-                if (this.small) {
-                    this.selList.addClass('small');
-                }
                 this.data = this.sortData(options.data);
                 this.render();
             },
@@ -105,8 +103,14 @@
                     this.control.append("<div class='_jpil_header'>" + this.headerText + "<span class='_clear' ></span><span class='_search' ></span><span class='_min' ></span> </div>");
                 }
                 //add selected list and select list containers
-                this.control.append("<div class='_jpil_selectedList'><span class='filterHead' >Active Filter(s):</span></div>");
+                this.control.append("<div class='_jpil_selectedList'><span class='filterHead' >Current Selection(s):</span></div>");
                 this.control.append("<div class='_jpil_selList _jpmsShow'></div>");
+                this.headerBox = this.container.find('._jpil_header');
+                this.selList = this.container.find('._jpil_selList');
+                this.selectedBox = this.container.find('._jpil_selectedList');
+                if (this.showSelected) {
+                    this.container.addClass('_showSelected');
+                }
             },
             this.render = function () {
                 var htmltoInsert = this.dataHTML;
@@ -256,7 +260,7 @@
                         e.data.selectedItems.push({ IndexId: -1, IndexText: term });
                     }
                     $(e.data.name + " ._jpil_selectedList img").unbind("click", e.data.iconAction);
-                    e.data.selectedBox.html('<span class="filterHead" >Active Filter(s):</span> ' + e.data.selected.join(', '));
+                    e.data.selectedBox.html('<span class="filterHead" >Current Selection(s):</span> ' + e.data.selected.join(', '));
                     $(e.data.name + " ._jpil_selectedList img").bind("click", e.data, e.data.iconAction);
                     if (e.data.selectedItems.length > 0 || (e.data.displayField == "noObject" && e.data.selected.length > 0)) {
                         e.data.container.addClass('_hasSelected');
@@ -313,7 +317,7 @@
                 }
 
                 $(this.name + " ._jpil_selectedList img").unbind("click", this.iconAction);
-                this.selectedBox.html('<span class="filterHead" >Active Filter(s):</span> ' + this.selected.join(', ') );
+                this.selectedBox.html('<span class="filterHead" >Current Selection(s):</span> ' + this.selected.join(', ') );
                 $(this.name + " ._jpil_selectedList img").bind("click", this, this.iconAction);
                 if (this.selectedItems.length > 0 || (this.displayField == "noObject" && this.selected.length > 0)) {
                     this.container.addClass('_hasSelected');
@@ -364,7 +368,7 @@
                     }
                 }
                 $(e.data.name + " ._jpil_selectedList img").unbind("click", e.data.iconAction);
-                e.data.selectedBox.html('<span class="filterHead" >Active Filter(s):</span> ' + e.data.selected.join(', '));
+                e.data.selectedBox.html('<span class="filterHead" >Current Selection(s):</span> ' + e.data.selected.join(', '));
                 $(e.data.name + " ._jpil_selectedList img").bind("click", e.data, e.data.iconAction);
                 if (e.data.selectedItems.length > 0 || (e.data.displayField == "noObject" && e.data.selected.length > 0)) {
                     e.data.container.addClass('_hasSelected');
@@ -396,29 +400,10 @@
             this.minMax = function (e) {
                 var me = e.data;
                 me.minMaxAction(me);
-                //if ($(me.name + " ._jpil_header ._min").hasClass("_max")) {
-                //    $(me.name + " ._jpil_header ._min").removeClass("_max");
-                //    me.container.removeClass("_min");
-                //} else {
-                //    $(me.name + " ._jpil_header ._min").addClass("_max");
-                //    me.container.addClass("_min");
-                //}
                 if (me.onResize != null) {
                     setTimeout(function () {
                         me.onResize(me);
                     }, 100);
-
-                }
-            },
-            this.iconClick = function (e) {
-                if ($(e.data.selList).hasClass('shown')) {
-                    $(e.data.selList).removeClass('shown');
-                    $(e.target).attr('src', 'Include/images/down.png');
-                    e.data.iconAction();
-
-                } else {
-                    $(e.data.selList).addClass('shown');
-                    $(e.target).attr('src', 'Include/images/apply.png');
                 }
             }
         }

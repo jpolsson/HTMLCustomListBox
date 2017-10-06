@@ -108,13 +108,15 @@
     overflow-y: auto;
     overflow-x: hidden;
     margin: 0 0 0 0;
+    height: 160px;
+    -webkit-transition: height 1s; /* Safari */
+    transition: height 1s;
 }
 
 
-._jpil_selList {
-    overflow-y: auto;
-    overflow-x: hidden;
-    height: 160px;
+._jpIndexList._min ._jpil_selList {
+    height: 0px;
+    overflow-y: hidden;
 }
 
 
@@ -130,10 +132,12 @@
     word-break: break-all;
     width: 100%;
     display: none;
+    padding: 1px 5px;
+    border-bottom:1px solid #d9dbde;
 }
 
-._jpIndexList._hasSelected ._jpil_selectedList{
-    display: none; /*turn off Control selected headers*/
+._jpIndexList._hasSelected._showSelected ._jpil_selectedList{
+    display: block; 
 }
 
 ._jpil_selItem {
@@ -183,7 +187,9 @@
 ._jpil_selectedList img:active{
     border: 2px inset rgba(0,0,0,.5);
 }
-
+._jpil_selectedList .filterHead {
+    color: #2488e6;
+}
 
 
 ._customAddBtn {
@@ -209,9 +215,9 @@
 }
 
 ._customAdd, ._searchTerm {
-    width: 338px;
+    width: calc(100% - 18px);
     padding: 2px 1px;
-    height: 16px;
+    height: 26px;
     margin-left: 18px;
 }
 

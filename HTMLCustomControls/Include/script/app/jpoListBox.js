@@ -1,68 +1,38 @@
-﻿define(["jquery","underscore"],function ($,_) {
+﻿define(["jquery", "underscore","listBoxHTMLGenerator"],function ($,_,htmlGen) {
     var jpIndexListBox = {
         cnter: 0,
         type: 'jpIndexListBox',
         control: function () {
+            this.options = {
+                headerText: 'List Header: set using headerText option',
+                displayField:'noObject',//if data is object array displayField is propertyname to display
+                idField:'',//if data is object array idField notes id field 
+                onApply:null,
+                onResize:null,
+                allowMultiple:true,
+                customAdd:false,
+                showSelected:false,
+            }
+            this.container = '',
             this.control,
             this.selList = '',
             this.headerBox = '',
-            this.headerText = 'List Header: set using headerText option',
             this.selectedBox = '',
             this.data = [],
-            this.displayField = '',//if data is object array displayField is propertyname to display
-            this.idField = '',//if data is object array idField notes id field 
+            this.dataHTML = [],
             this.selected = [],
             this.selectedItems = [],
-            this.iObjId = 0;
-            this.container = '',
-            this.onApply = null,
-            this.onResize = null,
-            this.fullLoad = false,
-            this.dataHTML = [],
-            this.allowMultiple = true,
-            this.customAdd = false,
-            this.small = false,
-            this.showSelected = false,
-            this.init = function (c, options) {
+            this.iObjId = 0;            
+            this.fullLoad = false,            
+            this.init = function (c, _options) {
                 this.container = $(c);
                 var me = this;
-                this.fieldName = options.fieldName;
-                if (!!options.onResize) {
-                    this.onResize = options.onResize;
-                }
-                if (!options.displayField) {//accepts a string array or an object array as datasource
-                    this.displayField = 'noObject';
-                } else {
-                    this.displayField = options.displayField;
-                }
-                if (!options.idField) {
-                    this.idField = 'noId';
-                } else {
-                    this.idField = options.idField;
-                }
-                if (!!options.onApply) {
-                    this.onApply = options.onApply;
-                }
-                if (!!options.allowMultiple) {
-                    this.allowMultiple = options.allowMultiple;
-                }
-                if (!!options.customAdd) {
-                    this.customAdd = options.customAdd;
-                }
-                if (!!options.showSelected) {
-                    this.showSelected = options.showSelected;
-                }
-                if (!options.small) {
-                    options.small = false;
-                }
-                if (!!options.headerText) {
-                    this.headerText = options.headerText;
-                }
-                this.small = options.small;
+                this.options = _.extend(this.options, _options);
                 jpIndexListBox.cnter += 1;
                 this.name = '#_jpil_' + jpIndexListBox.cnter;
-                this.buildFrame(options);
-                this.data = this.sortData(options.data);
+                this.id ='_jpil_' + jpIndexListBox.cnter;
+                this.buildFrame();
+                this.data = this.sortData(_options.data);
                 this.render();
             },
             this.sortData = function (dataset) {
@@ -70,12 +40,12 @@
                 var sFunction = function (a, b) {
                     var atest = '';
                     var btest = '';
-                    if (me.displayField == 'noObject') {
+                    if (me.options.displayField == 'noObject') {
                         atest = a.toLowerCase();
                         btest = b.toLowerCase();
                     } else {
-                        atest = a[me.displayField].toLowerCase();
-                        btest = b[me.displayField].toLowerCase();
+                        atest = a[me.options.displayField].toLowerCase();
+                        btest = b[me.options.displayField].toLowerCase();
                     }
                     switch (true) {
                         case (atest > btest):
@@ -91,24 +61,17 @@
                 };
                 return dataset.sort(sFunction);
             },
-            this.buildFrame = function (options) {
+            this.buildFrame = function () {
                 //create html structure of listbox
-                this.container.append("<div class='_jpil' id='_jpil_" + jpIndexListBox.cnter + "'> </div>");
+                var data = { instanceId: this.id, headerText: this.options.headerText, customAdd: this.options.customAdd };
+                var htmlToInsert = htmlGen.buildFrame(data);
+                this.container.append(htmlToInsert);
                 this.container.addClass('_jpIndexList');
                 this.control = this.container.children(this.name);//div container for contents of control
-                //add header
-                if (this.customAdd) {
-                    this.control.append("<div class='_jpil_header'>" + this.headerText + "<span class='_customAddBtn'></span><span class='_clear' ></span><span class='_search' ></span><span class='_min' ></span> </div>");
-                } else {
-                    this.control.append("<div class='_jpil_header'>" + this.headerText + "<span class='_clear' ></span><span class='_search' ></span><span class='_min' ></span> </div>");
-                }
-                //add selected list and select list containers
-                this.control.append("<div class='_jpil_selectedList'><span class='filterHead' >Current Selection(s):</span></div>");
-                this.control.append("<div class='_jpil_selList _jpmsShow'></div>");
                 this.headerBox = this.container.find('._jpil_header');
                 this.selList = this.container.find('._jpil_selList');
                 this.selectedBox = this.container.find('._jpil_selectedList');
-                if (this.showSelected) {
+                if (this.options.showSelected) {
                     this.container.addClass('_showSelected');
                 }
             },
@@ -117,48 +80,57 @@
                 htmltoInsert[0] = '';
                 htmltoInsert[1] = '';
                 var listnum = 10;
+                var me = this;
                 this.fullLoad = false;
                 if (listnum > this.data.length) {
                     listnum = this.data.length;
                     this.fullLoad = true;
                 }
-                if (this.displayField == 'noObject') {
-                    for (i = 0; i < this.data.length; i++) {
-                        //this.selList.append("<div class='_jpil_selItem' data-recId=" + i + " data-id=" + this.data[i] + " data-tval='" + this.data[i].toLowerCase() + "' >" + this.data[i] + "</div>")
-                        if (i < listnum) {
-                            htmltoInsert[0] += "<div class='_jpil_selItem' data-recId=" + i + " data-id=" + this.data[i] + " data-tval='" + this.data[i].toLowerCase() + "' >" + this.data[i] + "</div>";
-                        } else {
-                            htmltoInsert[1] += "<div class='_jpil_selItem' data-recId=" + i + " data-id=" + this.data[i] + " data-tval='" + this.data[i].toLowerCase() + "' >" + this.data[i] + "</div>";
-                        }
-
-                    }
+                var initLoadData = this.data.slice(0, listnum);
+                var fullLoadData = this.data.slice(listnum, this.data.length);
+                if (this.options.displayField == 'noObject') {
+                    initLoadData = initLoadData.map(function (i) {
+                        return { dataId: i, dataValue: i.toLowerCase(), displayValue: i };
+                    });
+                    fullLoadData = fullLoadData.map(function (i) {
+                        return { dataId: i, dataValue: i.toLowerCase(), displayValue: i };
+                    })
                 } else {
-                    for (i = 0; i < this.data.length; i++) {
-                        //this.selList.append("<div class='_jpil_selItem' data-recId=" + i + " data-id=" + this.data[i][this.idField] + " data-tval='" + this.data[i][this.displayField].toLowerCase() + "' >" + this.data[i][this.displayField] + "</div>")
-                        if (i < listnum) {
-                            htmltoInsert[0] += "<div class='_jpil_selItem' data-recId=" + i + " data-id=" + this.data[i][this.idField] + " data-tval='" + this.data[i][this.displayField].toLowerCase() + "' >" + this.data[i][this.displayField] + "</div>";
-                        } else {
-                            htmltoInsert[1] += "<div class='_jpil_selItem' data-recId=" + i + " data-id=" + this.data[i][this.idField] + " data-tval='" + this.data[i][this.displayField].toLowerCase() + "' >" + this.data[i][this.displayField] + "</div>";
-                        }
+                    initLoadData = initLoadData.map(function (i) {
+                        return { dataId: i[me.options.idField], dataValue: i[me.options.displayField].toLowerCase(), displayValue: i[me.options.displayField] };
+                    });
+                    fullLoadData = fullLoadData.map(function (i) {
+                        return { dataId: i[me.options.idField], dataValue: i[me.options.displayField].toLowerCase(), displayValue: i[me.options.displayField]  };
+                    })
+                }
+                var idx = 0;
+                var dataToRender = {
+                    idx: function () {
+                        return idx++;
                     }
                 }
+                dataToRender.items = initLoadData;
+                htmltoInsert[0] = htmlGen.buildList(dataToRender);
+                dataToRender.items = fullLoadData;
+                htmltoInsert[1] = htmlGen.buildList(dataToRender);
                 console.log("ILB render set list html : " + Date.now());
                 this.selList.html(htmltoInsert[0]);
-
                 if (this.container.hasClass("_min")) {
-                    $(this.name + " ._jpil_header ._min").addClass("_max");
-                }
+                    this.headerBox.addClass("_max");
+                    //$(this.name + " ._jpil_header ._min").addClass("_max");
+                 }
+                //add selected class to any selected items
                 if (this.selectedItems.length > 0) {
                     for (var i = 0; i < this.selected.length; i++) {
-                        $(this.name + " ._jpil_selItem[data-id='" + this.selectedItems[i][this.idField] + "']").addClass('selected');
+                        $(this.name + " ._jpil_selItem[data-id='" + this.selectedItems[i][this.options.idField] + "']").addClass('selected');
                     }
                 }
                 this.bind();
             },
-            this.updateData = function (options) {
+            this.updateData = function (_options) {
                 var me = this;
                 console.log("ILB updateData sort data: " + Date.now());
-                this.data = this.sortData(options.data);
+                this.data = this.sortData(_options.data);
                 console.log("ILB updateData unbind: " + Date.now());
                 this.unbind();
                 console.log("ILB updateData clear list: " + Date.now());
@@ -166,34 +138,29 @@
                 this.render();
             },
             this.bind = function () {
-                var me = this;
-                $(this.name + " ._jpil_header ._clear").bind("click", this, this.iconAction);
-                $(this.name + " ._jpil_header ._search").bind("click", this, this.search);
-
-                $(this.name + " ._jpil_selItem").bind("click", me, this.itemSelected);
-              
+                this.headerBox.on("click", "._clear", this, this.clearBtnhandler);
+                this.headerBox.on("click", "._search", this, this.search);
+                this.selList.on("click", "._jpil_selItem", this, this.itemSelected);              
                 if (this.customAdd) {
-                    $(this.name + " ._customAddBtn").bind("click", me, this.customAddClick);
+                    this.control.on("click", "._customAddBtn", this, this.customAddClick);
                 }
-                $(this.name + " ._jpil_header ._min").bind("click", this, this.minMax);
+                this.headerBox.on("click", "._min", this, this.minMax);
                 if (!this.fullLoad) {
-                    $(this.name).bind("click", this, this.checkStatus);
-                    $(this.name + " ._jpil_selList").bind("scroll", this, this.checkStatus);
+                    this.control.on("click", this, this.checkStatus);
+                    this.selList.on("scroll", this, this.checkStatus);
                 }
-
-
             },
             this.unbind = function () {
-                $(this.name + " ._jpil_header ._clear").unbind("click", this.iconAction);
-                $(this.name + " ._jpil_header ._search").unbind("click", this.search);
-                $(this.name + " ._jpil_selItem").unbind("click", this.itemSelected);
-                if (this.customAdd) {
-                    $(this.name + " ._customAddBtn").unbind("click", this.customAddClick);
-                }
-                $(this.name + " ._jpil_header ._min").unbind("click", this.minMax);
-                $(this.name).unbind("click", this.checkStatus);
-                $(this.name + " ._jpil_selList").unbind("scroll", this.checkStatus);
+                this.headerBox.off("click", "._clear", this.clearBtnhandler);
+                this.headerBox.off("click", "._search", this.search);
+                this.selList.off("click", "._jpil_selItem", this.itemSelected);              
 
+                if (this.customAdd) {
+                    this.control.off("click", "._customAddBtn", this.customAddClick);
+                }
+                this.headerBox.off("click", "._min", this.minMax);
+                this.control.off("click",this.checkStatus);
+                this.selList.off("scroll", this.checkStatus);
             },
             this.checkStatus = function (e) {
                 var me = this;
@@ -205,8 +172,6 @@
                     me.fullLoad = true;
                     me.unbind();
                     me.bind();
-                    //$(me.name).unbind("click", me.checkStatus);
-                    //$(me.name + " ._jpil_selList").unbind("scroll", me.checkStatus);
                 }
             },
             this.closeSearch = function (e) {
@@ -255,26 +220,21 @@
                     var term = $(me.name + " ._customAdd").val().trim();
                     //if (term != '') {
                     //manage text selected array
-                    if ($.inArray(term, e.data.selected) == -1) {
-                        e.data.selected.push(term);
-                        e.data.selectedItems.push({ IndexId: -1, IndexText: term });
+                    if ($.inArray(term, me.selected) == -1) {
+                        me.selected.push(term);
+                        me.selectedItems.push({ IndexId: -1, IndexText: term });
                     }
-                    $(e.data.name + " ._jpil_selectedList img").unbind("click", e.data.iconAction);
-                    e.data.selectedBox.html('<span class="filterHead" >Current Selection(s):</span> ' + e.data.selected.join(', '));
-                    $(e.data.name + " ._jpil_selectedList img").bind("click", e.data, e.data.iconAction);
-                    if (e.data.selectedItems.length > 0 || (e.data.displayField == "noObject" && e.data.selected.length > 0)) {
-                        e.data.container.addClass('_hasSelected');
+                    me.selectedBox.html('<span class="filterHead" >Current Selection(s):</span> ' + me.selected.join(', '));
+                    if (me.selectedItems.length > 0 || (me.options.displayField == "noObject" && me.selected.length > 0)) {
+                        me.container.addClass('_hasSelected');
                     } else {
-                        e.data.container.removeClass('_hasSelected');
+                        me.container.removeClass('_hasSelected');
                     }
-                    e.data.onApply(e.data);
+                    me.options.onApply(me);
                     $(me.name + " ._customAdd").val('');
                     me.control.find("._jpil_customAdd ._closeX").unbind("click", me.closeCustom);
                     me.control.find("._jpil_customAdd ._customAdd").unbind("keydown", me.customAddAction);
                     me.control.find("._jpil_customAdd").remove();
-                    //} else {
-                    //    alert('Please add a custom search term.');
-                    //}
                 }
             },
             this.customAddClick = function (e) {
@@ -290,7 +250,6 @@
                 this.selected = [];
                 this.selectedItems = [];
                 $(this.name + " ._jpil_selItem").removeClass('selected');
-
                 this.container.removeClass('_hasSelected');
             },
             this.setSelected = function (index, cxlfireEvent) {//clears any existing selections and sets new index
@@ -313,96 +272,94 @@
                     })[0];
                     this.selected.push(selItem[this.displayField]);
                     this.selectedItems.push(selItem);
-                    $(this.name + " ._jpil_selItem[data-id='" + selItem[this.idField] + "']").addClass('selected');
+                    //$(this.name + " ._jpil_selItem[data-id='" + selItem[this.idField] + "']").addClass('selected');
+                    this.selList.find("._jpil_selItem[data-id='" + selItem[this.idField] + "']").addClass('selected');
                 }
 
-                $(this.name + " ._jpil_selectedList img").unbind("click", this.iconAction);
                 this.selectedBox.html('<span class="filterHead" >Current Selection(s):</span> ' + this.selected.join(', ') );
-                $(this.name + " ._jpil_selectedList img").bind("click", this, this.iconAction);
                 if (this.selectedItems.length > 0 || (this.displayField == "noObject" && this.selected.length > 0)) {
                     this.container.addClass('_hasSelected');
                 } else {
                     this.container.removeClass('_hasSelected');
                 }
                 if (!cxlfireEvent) {
-                    this.onApply(this);
+                    this.options.onApply(this);
                 }
             },
             this.itemSelected = function (e) {
-                if (e.data.allowMultiple) {
+                  var me = e.data;
+                if (me.options.allowMultiple) {
                     if ($(e.target).hasClass('selected')) {
                         $(e.target).removeClass('selected');
                         //manage text selected array
-                        if ($.inArray($(e.target).text(), e.data.selected) > -1) {
-                            e.data.selected = $.grep(e.data.selected, function (a) {
+                        if ($.inArray($(e.target).text(), me.selected) > -1) {
+                            me.selected = $.grep(me.selected, function (a) {
                                 return a !== $(e.target).text();
                             });
                         }
-                        if (!(e.data.displayField == "noObject")) {
+                        if (!(me.options.displayField == "noObject")) {
                             //manage item selected array
-                            e.data.selectedItems = $.grep(e.data.selectedItems, function (a) {
-                                return a[e.data.displayField] !== $(e.target).text();
+                            me.selectedItems = $.grep(me.selectedItems, function (a) {
+                                return a[me.options.displayField] !== $(e.target).text();
                             });
                         }
                     } else {
                         $(e.target).addClass('selected');
                         //manage text selected array
-                        if ($.inArray($(e.target).text(), e.data.selected) == -1) {
-                            e.data.selected.push($(e.target).text());
+                        if ($.inArray($(e.target).text(), me.selected) == -1) {
+                            me.selected.push($(e.target).text());
                         }
-                        if (!(e.data.displayField == "noObject")) {
+                        if (!(me.options.displayField == "noObject")) {
                             //manage item selected array
-                            e.data.selectedItems.push(e.data.data[$(e.target).data('recid')]);
+                            me.selectedItems.push(me.data[$(e.target).data('recid')]);
                         }
                     }
                 } else {
-                    e.data.selected = [];
-                    e.data.selectedItems = [];
+                    me.selected = [];
+                    me.selectedItems = [];
                     if ($(e.target).hasClass('selected')) {
                         $(e.target).removeClass('selected');
                     } else {
-                        $(e.data.selList).children().removeClass('selected');
+                        $(me.selList).children().removeClass('selected');
                         $(e.target).addClass('selected');
-                        e.data.selected.push($(e.target).text());
-                        e.data.selectedItems.push(e.data.data[$(e.target).data('recid')]);
+                        me.selected.push($(e.target).text());
+                        me.selectedItems.push(me.data[$(e.target).data('recid')]);
                     }
                 }
-                $(e.data.name + " ._jpil_selectedList img").unbind("click", e.data.iconAction);
-                e.data.selectedBox.html('<span class="filterHead" >Current Selection(s):</span> ' + e.data.selected.join(', '));
-                $(e.data.name + " ._jpil_selectedList img").bind("click", e.data, e.data.iconAction);
-                if (e.data.selectedItems.length > 0 || (e.data.displayField == "noObject" && e.data.selected.length > 0)) {
-                    e.data.container.addClass('_hasSelected');
+                me.selectedBox.html('<span class="filterHead" >Current Selection(s):</span> ' + me.selected.join(', '));
+                if (me.selectedItems.length > 0 || (me.options.displayField == "noObject" && me.selected.length > 0)) {
+                    me.container.addClass('_hasSelected');
                 } else {
-                    e.data.container.removeClass('_hasSelected');
+                    me.container.removeClass('_hasSelected');
                 }
-                e.data.closeSearch(e);
-                if (!!e.data.onApply) {
-                    e.data.onApply(e.data);
+                me.closeSearch(e);
+                if (!!me.options.onApply) {
+                    me.options.onApply(me);
                 }
             },
-            this.iconAction = function (e) {
+            this.clearBtnhandler = function (e) {
                 //Clear selected items
                 var me = e.data;
                 me.clearSelected();
-                if (!!me.onApply) {
-                    me.onApply(me);
+                if (!!me.options.onApply) {
+                    me.options.onApply(me);
                 }
             },
             this.minMaxAction = function (me) {
-                if ($(me.name + " ._jpil_header ._min").hasClass("_max")) {
-                    $(me.name + " ._jpil_header ._min").removeClass("_max");
+                if (me.headerBox.hasClass("_max")) {
+                    me.headerBox.removeClass("_max");
                     me.container.removeClass("_min");
                 } else {
-                    $(me.name + " ._jpil_header ._min").addClass("_max");
+                    me.headerBox.addClass("_max");
                     me.container.addClass("_min");
                 }
             },
             this.minMax = function (e) {
                 var me = e.data;
                 me.minMaxAction(me);
-                if (me.onResize != null) {
+                if (me.options.onResize != null) {
                     setTimeout(function () {
-                        me.onResize(me);
+                        me.options.onResize(me);
                     }, 100);
                 }
             }

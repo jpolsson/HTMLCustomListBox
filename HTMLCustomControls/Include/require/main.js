@@ -5,8 +5,10 @@
         "main": "require/main",                              // require.js initializer
         "jquery": "script/vendor/jquery-3.2.1.min",
         "underscore": "script/vendor/underscore.min",
+        "hogan": "script/vendor/hogan",
         "appControl": "script/app/appControl",
-        "listBox": "script/app/jpoListBox"
+        "listBox": "script/app/jpoListBox",
+        "listBoxHTMLGenerator": "script/app/listBoxHTMLGenerator"
     },
     urlArgs: "bust=" + (new Date()).getTime(),
     modules: [

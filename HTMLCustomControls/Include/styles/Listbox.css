@@ -88,7 +88,7 @@
     right: 9px;
 }
 
-._jpil_header ._min._max:before {
+._jpil_header._max ._min:before {
     transform: rotate(90deg);
     right: 7px;
 }

@@ -18,7 +18,11 @@
                     var jsonData = [{ name: "Denver Broncos", city: "Denver", teamId: 1 }, { name: "Los Angeles Chargers", city: "Los Angeles", teamId: 2 }, { name: "Las Vegas Raiders", city: "Las Vegas", teamId: 3 }, { name: "Los Angeles Rams", city: "Los Angeles", teamId: 4 }, { name: "Baltimore Ravens", city: "Baltimore", teamId: 5 },
                     { name: "Cinicinnati Bengals", city: "Cinicinnati", teamId: 6 }, { name: "Cleveland Browns", city: "Cleveland", teamId: 7 }, { name: "Pittsburgh Steelers", city: "Pittsburgh", teamId: 8 }, { name: "Houston Texans", city: "Houston", teamId: 9 }, { name: "Indianapolis Colts", city: "Indianapolis", teamId: 10 },
                     { name: "Jacksonville Jaguars", city: "Jacksonville", teamId: 11 }, { name: "Tennessee Titans", city: "Nashville", teamId: 12 }];
-                    newList3.init('#NFLTeamList3', { data: jsonData, headerText: 'AFC Football Teams', showSelected: true, displayField: 'name', idField:'teamId' });
+                    //newList3.init('#NFLTeamList3', { data: jsonData, headerText: 'AFC Football Teams', showSelected: true, displayField: 'name', idField: 'teamId' });
+                    newList3.init('#NFLTeamList3', { dataUrl: 'api/Teams', headerText: 'AFC Football Teams', showSelected: true, displayField: 'name', idField: 'teamId' });                    
+                    $('.btnRefresh').on('click', function (e) {
+                       newList3.refresh();
+                    });
                 });
             };
             var appControlInterface = {

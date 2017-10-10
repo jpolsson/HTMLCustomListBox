@@ -155,6 +155,7 @@
     </Compile>
     <Compile Include="Interfaces\ITeamDataProvider.cs" />
     <Compile Include="Interfaces\ITeamProvider.cs" />
+    <Compile Include="Models\CacheClient.cs" />
     <Compile Include="Models\Team.cs" />
     <Compile Include="Models\Teams.cs" />
     <Compile Include="Models\TestDataProvider.cs" />

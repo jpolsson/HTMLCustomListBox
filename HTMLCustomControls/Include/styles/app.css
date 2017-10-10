@@ -2,10 +2,59 @@
 .teamList {
     margin: 40px 40px;
 }
-.list1Selections {
+.outputDiv {
     margin: 5px 40px;
 }
 .filterHead {
     color: #2488e6;
     font-weight:700;
+}
+.btnRefresh{
+    height:25px;
+    width:25px;
+    border-radius:3px;
+    border:2px outset #808080;
+    margin-left:465px;
+    margin-top:-36px;
+    cursor:pointer;
+    position:relative;
+}
+.btnRefresh:before {
+    content: "\21b5";
+    position: relative;
+    top: -5px;
+    right: -3px;
+    font-size:28px;
+}
+.btnRefresh:hover {
+    border: 3px outset #ffd800;
+}
+.btnRefresh:active {
+    border: 2px inset #808080;
+}
+/*Tool tips*/
+.cssTooltip:hover::after {
+    content: attr(data-tip);
+    font-size: 14px;
+    position: absolute;
+    z-index: 999;
+    white-space: nowrap;
+    left: 24px;
+    top: 10px;
+    background: #B2C2CE;
+    color: #0070c0;
+    padding: 0px 7px;
+    line-height: 24px;
+    height: auto;
+    width: auto;
+    min-width: 225px;
+    word-wrap: break-word;
+    line-height: 24px;
+    font-weight: 600;
+    opacity: 1;
+    transition: opacity 0.4s ease-out;
+    border-radius: 5px;
+    display: block;
+    white-space: normal;
+    text-decoration: none;
 }
